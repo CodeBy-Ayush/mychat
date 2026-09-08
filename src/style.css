@@ -8,6 +8,98 @@ body {
     background: #d9dbd5;
 }
 
+
+/* =========================
+   NAME SCREEN
+========================= */
+
+.name-screen {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #d9dbd5;
+    padding: 20px;
+}
+
+.name-card {
+    width: 100%;
+    max-width: 420px;
+    background: white;
+    padding: 40px 30px;
+    border-radius: 16px;
+    text-align: center;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+}
+
+.name-icon {
+    width: 70px;
+    height: 70px;
+    margin: 0 auto 18px;
+    border-radius: 50%;
+    background: #128c7e;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 35px;
+}
+
+.name-card h1 {
+    margin: 0;
+    color: #075e54;
+    font-size: 27px;
+}
+
+.name-card p {
+    margin: 10px 0 22px;
+    color: #667781;
+}
+
+.name-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.name-form input {
+    width: 100%;
+    border: 1px solid #ddd;
+    outline: none;
+    border-radius: 25px;
+    padding: 14px 18px;
+    font-size: 15px;
+}
+
+.name-form input:focus {
+    border-color: #128c7e;
+}
+
+.name-form button {
+    border: none;
+    border-radius: 25px;
+    padding: 13px;
+    background: #128c7e;
+    color: white;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+.name-form button:hover {
+    background: #075e54;
+}
+
+.name-card small {
+    display: block;
+    margin-top: 18px;
+    color: #667781;
+    font-size: 12px;
+}
+
+
+/* =========================
+   CHAT
+========================= */
+
 .app {
     min-height: 100vh;
     display: flex;
@@ -27,7 +119,9 @@ body {
 }
 
 
-/* HEADER */
+/* =========================
+   HEADER
+========================= */
 
 .chat-header {
     height: 70px;
@@ -82,7 +176,9 @@ body {
 }
 
 
-/* MESSAGES */
+/* =========================
+   MESSAGES
+========================= */
 
 .messages {
     flex: 1;
@@ -107,22 +203,49 @@ body {
     box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
 }
 
+.sender-name {
+    color: #075e54;
+    font-size: 12px;
+    font-weight: bold;
+    margin-bottom: 4px;
+}
+
 .message-text {
     font-size: 15px;
     line-height: 1.4;
     word-break: break-word;
 }
 
+.message-bottom {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 6px;
+    margin-top: 4px;
+}
+
 .message-time {
-    display: block;
-    text-align: right;
     color: #667781;
     font-size: 10px;
-    margin-top: 5px;
+}
+
+.delete-btn {
+    border: none;
+    background: transparent;
+    color: #667781;
+    font-size: 12px;
+    padding: 2px;
+    cursor: pointer;
+}
+
+.delete-btn:hover {
+    color: #c62828;
 }
 
 
-/* FILE CARD */
+/* =========================
+   FILE CARD
+========================= */
 
 .file-card {
     display: flex;
@@ -178,7 +301,9 @@ body {
 }
 
 
-/* EMPTY CHAT */
+/* =========================
+   EMPTY CHAT
+========================= */
 
 .empty {
     height: 100%;
@@ -206,7 +331,9 @@ body {
 }
 
 
-/* INPUT */
+/* =========================
+   MESSAGE INPUT
+========================= */
 
 .message-box {
     min-height: 65px;
@@ -249,7 +376,9 @@ body {
 }
 
 
-/* FILE BUTTON */
+/* =========================
+   FILE BUTTON
+========================= */
 
 .file-button {
     width: 45px;
@@ -269,7 +398,9 @@ body {
 }
 
 
-/* MOBILE */
+/* =========================
+   MOBILE
+========================= */
 
 @media (max-width: 700px) {
     .app {
@@ -301,5 +432,8 @@ body {
     }
     .file-card {
         min-width: 190px;
+    }
+    .name-card {
+        padding: 30px 22px;
     }
 }

@@ -1,164 +1,368 @@
 import { useEffect, useState } from "react";
-import { ref, push, onValue } from "firebase/database";
+import {
+  ref,
+  push,
+  onValue,
+  remove,
+} from "firebase/database";
+
 import { db } from "./firebase";
 import { uploadFile } from "./fileUpload";
+
 import "./style.css";
 
 function App() {
+
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
+
   const [uploading, setUploading] = useState(false);
+
+  const [name, setName] = useState(
+    localStorage.getItem("chatName") || ""
+  );
+
+  const [nameInput, setNameInput] = useState("");
 
   // =========================
   // LOAD MESSAGES
   // =========================
 
   useEffect(() => {
-    const messagesRef = ref(db, "private-chat/messages");
 
-    const unsubscribe = onValue(messagesRef, (snapshot) => {
-      const data = snapshot.val();
+    const messagesRef =
+      ref(db, "private-chat/messages");
 
-      if (!data) {
-        setMessages([]);
-        return;
+    const unsubscribe = onValue(
+      messagesRef,
+      (snapshot) => {
+
+        const data = snapshot.val();
+
+        if (!data) {
+          setMessages([]);
+          return;
+        }
+
+        const messageList =
+          Object.entries(data).map(
+            ([id, value]) => ({
+              id,
+              ...value,
+            })
+          );
+
+        messageList.sort(
+          (a, b) => a.time - b.time
+        );
+
+        setMessages(messageList);
       }
-
-      const messageList = Object.entries(data).map(([id, value]) => ({
-        id,
-        ...value,
-      }));
-
-      messageList.sort((a, b) => a.time - b.time);
-
-      setMessages(messageList);
-    });
+    );
 
     return () => unsubscribe();
+
   }, []);
 
+
   // =========================
-  // SEND TEXT MESSAGE
+  // SAVE NAME
+  // =========================
+
+  const saveName = (e) => {
+
+    e.preventDefault();
+
+    const cleanName =
+      nameInput.trim();
+
+    if (!cleanName) return;
+
+    localStorage.setItem(
+      "chatName",
+      cleanName
+    );
+
+    setName(cleanName);
+  };
+
+
+  // =========================
+  // SEND TEXT
   // =========================
 
   const sendMessage = async (e) => {
+
     e.preventDefault();
 
     if (!message.trim()) return;
 
+    if (!name) return;
+
     try {
-      await push(ref(db, "private-chat/messages"), {
-        type: "text",
-        text: message.trim(),
-        time: Date.now(),
-      });
+
+      await push(
+        ref(db, "private-chat/messages"),
+        {
+          type: "text",
+
+          text: message.trim(),
+
+          senderName: name,
+
+          time: Date.now(),
+        }
+      );
 
       setMessage("");
+
     } catch (error) {
+
       console.error(error);
+
       alert("Message send failed.");
+
     }
   };
+
 
   // =========================
   // UPLOAD FILE
   // =========================
 
   const handleFileUpload = async (e) => {
-    const file = e.target.files[0];
+
+    const file =
+      e.target.files[0];
 
     if (!file) return;
 
+    if (!name) return;
+
     try {
+
       setUploading(true);
 
-      const uploadedFile = await uploadFile(file);
+      const uploadedFile =
+        await uploadFile(file);
 
-      await push(ref(db, "private-chat/messages"), {
-        type: "file",
-        fileName: uploadedFile.name,
-        fileSize: uploadedFile.size,
-        fileType: uploadedFile.type,
-        fileUrl: uploadedFile.url,
-        time: Date.now(),
-      });
+      await push(
+        ref(db, "private-chat/messages"),
+        {
+          type: "file",
+
+          fileName:
+            uploadedFile.name,
+
+          fileSize:
+            uploadedFile.size,
+
+          fileType:
+            uploadedFile.type,
+
+          fileUrl:
+            uploadedFile.url,
+
+          senderName: name,
+
+          time: Date.now(),
+        }
+      );
 
     } catch (error) {
+
       console.error(error);
 
       alert(
-        "File upload failed:\n" + error.message
+        "File upload failed:\n" +
+        error.message
       );
 
     } finally {
+
       setUploading(false);
 
       e.target.value = "";
+
     }
   };
 
+
   // =========================
-  // COPY CHAT LINK
+  // DELETE MESSAGE
+  // =========================
+
+  const deleteMessage = async (id) => {
+
+    const confirmDelete =
+      window.confirm(
+        "Delete this message?"
+      );
+
+    if (!confirmDelete) return;
+
+    try {
+
+      await remove(
+        ref(
+          db,
+          `private-chat/messages/${id}`
+        )
+      );
+
+    } catch (error) {
+
+      console.error(error);
+
+      alert(
+        "Unable to delete message."
+      );
+
+    }
+  };
+
+
+  // =========================
+  // COPY LINK
   // =========================
 
   const copyLink = async () => {
+
     try {
+
       await navigator.clipboard.writeText(
         window.location.href
       );
 
       alert("Chat link copied!");
+
     } catch (error) {
+
       console.error(error);
+
       alert("Unable to copy link.");
+
     }
   };
+
 
   // =========================
   // FORMAT TIME
   // =========================
 
   const formatTime = (time) => {
-    return new Date(time).toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+
+    return new Date(time)
+      .toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+
   };
+
 
   // =========================
   // FORMAT FILE SIZE
   // =========================
 
   const formatFileSize = (bytes) => {
+
     if (!bytes) return "";
 
     if (bytes < 1024) {
+
       return bytes + " B";
+
     }
 
     if (bytes < 1024 * 1024) {
+
       return (
         (bytes / 1024).toFixed(1) +
         " KB"
       );
+
     }
 
     return (
       (bytes / (1024 * 1024)).toFixed(1) +
       " MB"
     );
+
   };
 
+
   // =========================
-  // UI
+  // NAME SCREEN
+  // =========================
+
+  if (!name) {
+
+    return (
+
+      <div className="name-screen">
+
+        <div className="name-card">
+
+          <div className="name-icon">
+            💬
+          </div>
+
+          <h1>
+            Private Chat
+          </h1>
+
+          <p>
+            What should we call you?
+          </p>
+
+          <form
+            onSubmit={saveName}
+            className="name-form"
+          >
+
+            <input
+              type="text"
+              placeholder="Enter your name"
+              value={nameInput}
+              onChange={(e) =>
+                setNameInput(e.target.value)
+              }
+              maxLength={30}
+              autoFocus
+            />
+
+            <button type="submit">
+              Continue
+            </button>
+
+          </form>
+
+          <small>
+            No login or signup required
+          </small>
+
+        </div>
+
+      </div>
+
+    );
+
+  }
+
+
+  // =========================
+  // CHAT UI
   // =========================
 
   return (
+
     <div className="app">
 
       <div className="chat-container">
 
-        {/* ================= HEADER ================= */}
+
+        {/* HEADER */}
 
         <header className="chat-header">
 
@@ -169,14 +373,19 @@ function App() {
             </div>
 
             <div>
-              <h1>Private Chat</h1>
+
+              <h1>
+                Private Chat
+              </h1>
 
               <p>
-                Online • No Login Required
+                {name} • Online
               </p>
+
             </div>
 
           </div>
+
 
           <button
             className="copy-btn"
@@ -188,7 +397,7 @@ function App() {
         </header>
 
 
-        {/* ================= MESSAGES ================= */}
+        {/* MESSAGES */}
 
         <main className="messages">
 
@@ -222,18 +431,28 @@ function App() {
 
                 <div className="message">
 
-                  {/* TEXT MESSAGE */}
+
+                  {/* SENDER NAME */}
+
+                  <div className="sender-name">
+                    {item.senderName || "Unknown"}
+                  </div>
+
+
+                  {/* TEXT */}
 
                   {item.type !== "file" && (
 
                     <div className="message-text">
+
                       {item.text}
+
                     </div>
 
                   )}
 
 
-                  {/* FILE MESSAGE */}
+                  {/* FILE */}
 
                   {item.type === "file" && (
 
@@ -272,13 +491,30 @@ function App() {
                   )}
 
 
-                  {/* TIME */}
+                  {/* BOTTOM */}
 
-                  <span className="message-time">
+                  <div className="message-bottom">
 
-                    {formatTime(item.time)}
+                    <span className="message-time">
 
-                  </span>
+                      {formatTime(
+                        item.time
+                      )}
+
+                    </span>
+
+
+                    <button
+                      className="delete-btn"
+                      onClick={() =>
+                        deleteMessage(item.id)
+                      }
+                      title="Delete message"
+                    >
+                      🗑
+                    </button>
+
+                  </div>
 
                 </div>
 
@@ -291,12 +527,13 @@ function App() {
         </main>
 
 
-        {/* ================= INPUT ================= */}
+        {/* INPUT */}
 
         <form
           className="message-box"
           onSubmit={sendMessage}
         >
+
 
           {/* FILE BUTTON */}
 
@@ -316,7 +553,7 @@ function App() {
           </label>
 
 
-          {/* MESSAGE INPUT */}
+          {/* TEXT */}
 
           <input
             type="text"
@@ -333,7 +570,7 @@ function App() {
           />
 
 
-          {/* SEND BUTTON */}
+          {/* SEND */}
 
           <button
             type="submit"
@@ -342,12 +579,15 @@ function App() {
             ➤
           </button>
 
+
         </form>
 
       </div>
 
     </div>
+
   );
+
 }
 
 export default App;
