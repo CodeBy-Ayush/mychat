@@ -210,11 +210,45 @@ body {
     margin-bottom: 4px;
 }
 
+
+/* =========================
+   MESSAGE CONTENT + COPY
+========================= */
+
+.message-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+}
+
 .message-text {
+    flex: 1;
     font-size: 15px;
     line-height: 1.4;
     word-break: break-word;
 }
+
+.copy-message-btn {
+    border: none;
+    background: transparent;
+    color: #667781;
+    font-size: 14px;
+    padding: 2px;
+    cursor: pointer;
+    flex-shrink: 0;
+    opacity: 0.6;
+    transition: 0.2s ease;
+}
+
+.copy-message-btn:hover {
+    opacity: 1;
+    color: #075e54;
+}
+
+
+/* =========================
+   MESSAGE BOTTOM
+========================= */
 
 .message-bottom {
     display: flex;
@@ -435,5 +469,8 @@ body {
     }
     .name-card {
         padding: 30px 22px;
+    }
+    .copy-message-btn {
+        font-size: 13px;
     }
 }

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+
 import {
   ref,
   push,
@@ -10,6 +11,7 @@ import { db } from "./firebase";
 import { uploadFile } from "./fileUpload";
 
 import "./style.css";
+
 
 function App() {
 
@@ -23,6 +25,7 @@ function App() {
   );
 
   const [nameInput, setNameInput] = useState("");
+
 
   // =========================
   // LOAD MESSAGES
@@ -105,11 +108,8 @@ function App() {
         ref(db, "private-chat/messages"),
         {
           type: "text",
-
           text: message.trim(),
-
           senderName: name,
-
           time: Date.now(),
         }
       );
@@ -223,6 +223,32 @@ function App() {
 
 
   // =========================
+  // COPY MESSAGE
+  // =========================
+
+  const copyMessage = async (text) => {
+
+    try {
+
+      await navigator.clipboard.writeText(
+        text
+      );
+
+      alert("Message copied!");
+
+    } catch (error) {
+
+      console.error(error);
+
+      alert(
+        "Unable to copy message."
+      );
+
+    }
+  };
+
+
+  // =========================
   // COPY LINK
   // =========================
 
@@ -240,7 +266,9 @@ function App() {
 
       console.error(error);
 
-      alert("Unable to copy link.");
+      alert(
+        "Unable to copy link."
+      );
 
     }
   };
@@ -439,20 +467,32 @@ function App() {
                   </div>
 
 
-                  {/* TEXT */}
+                  {/* TEXT MESSAGE */}
 
                   {item.type !== "file" && (
 
-                    <div className="message-text">
+                    <div className="message-content">
 
-                      {item.text}
+                      <div className="message-text">
+                        {item.text}
+                      </div>
+
+                      <button
+                        className="copy-message-btn"
+                        onClick={() =>
+                          copyMessage(item.text)
+                        }
+                        title="Copy message"
+                      >
+                        📋
+                      </button>
 
                     </div>
 
                   )}
 
 
-                  {/* FILE */}
+                  {/* FILE MESSAGE */}
 
                   {item.type === "file" && (
 
@@ -496,13 +536,8 @@ function App() {
                   <div className="message-bottom">
 
                     <span className="message-time">
-
-                      {formatTime(
-                        item.time
-                      )}
-
+                      {formatTime(item.time)}
                     </span>
-
 
                     <button
                       className="delete-btn"
@@ -515,6 +550,7 @@ function App() {
                     </button>
 
                   </div>
+
 
                 </div>
 
@@ -553,7 +589,7 @@ function App() {
           </label>
 
 
-          {/* TEXT */}
+          {/* TEXT INPUT */}
 
           <input
             type="text"
@@ -570,7 +606,7 @@ function App() {
           />
 
 
-          {/* SEND */}
+          {/* SEND BUTTON */}
 
           <button
             type="submit"
@@ -582,6 +618,7 @@ function App() {
 
         </form>
 
+
       </div>
 
     </div>
@@ -589,5 +626,6 @@ function App() {
   );
 
 }
+
 
 export default App;
